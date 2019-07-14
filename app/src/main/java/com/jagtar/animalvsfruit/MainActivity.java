@@ -230,7 +230,7 @@ public class MainActivity extends AppCompatActivity {
                                         }
                                     } else if (dataFromParticle.equals("3")) {
                                         if (devices.get(i).getDevice().getID().equals(particleId)) {
-                                            showScore.setText("Device " + (i + 1)+ " Score " + devices.get(i).getScore());
+                                            showScore.setText(devices.get(i).getDevice().getName() + " "+ devices.get(i).getScore());
 
                                         }
                                     }
