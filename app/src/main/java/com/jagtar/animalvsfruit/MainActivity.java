@@ -8,6 +8,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,6 +55,9 @@ public class MainActivity extends AppCompatActivity {
     private List<ParticleDevice> mDevice;
     private List<DevicesData> devices = new LinkedList<>();
 
+    //FIREBASE CODE
+    public static DatabaseReference firebaseDB;
+    public static FirebaseDatabase database;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +73,10 @@ public class MainActivity extends AppCompatActivity {
         // 2. Setup your device variable
         getDeviceFromCloud();
         setWord();
+        database = FirebaseDatabase.getInstance();
+
+
+
 
         //resetting data
         quesCount = 1;
@@ -74,9 +84,6 @@ public class MainActivity extends AppCompatActivity {
             devices.get(i).setScore(0);
         }
     }
-
-
-
     public void setWord(){
         Random r1 = new Random();
         //selecting one array from two
@@ -94,7 +101,6 @@ public class MainActivity extends AppCompatActivity {
             currentWord = "2";
         }
     }
-
     //button to show next question
     public void nextQuestion(View view) {
         //getting answers from particle
@@ -125,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
             //checking if 5 questions done
-            if (quesCount < 2) {
+            if (quesCount < 5) {
                 setWord();
                 quesCount++;
             } else {
@@ -138,10 +144,14 @@ public class MainActivity extends AppCompatActivity {
                         Winner = devices.get(i).getDevice().getName();
                     }
                 }
+                //storing name and scores on in firebase database
+                firebaseDB = database.getReference("device");
+                firebaseDB.setValue(Winner.toString());
+                firebaseDB = database.getReference("score");
+                firebaseDB.setValue("" + Score);
+
+                // changing activity
                 Intent finalScreen = new Intent(this, FinalScore.class);
-                finalScreen.putExtra("device" , Winner);
-                finalScreen.putExtra("score","" + Score);
-                //Optional parameters
                 startActivity(finalScreen);
             }
 

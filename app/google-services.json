@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "838393979671",
+    "firebase_url": "https://animalvsfruit.firebaseio.com",
+    "project_id": "animalvsfruit",
+    "storage_bucket": "animalvsfruit.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:838393979671:android:f689041e35c41a81",
+        "android_client_info": {
+          "package_name": "com.jagtar.animalvsfruit"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "838393979671-m3v6pervr79iud8atc2iuhca13ncklhe.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jagtar.animalvsfruit",
+            "certificate_hash": "aec4548e7f81fafb74b0acf713ed22a77a9da615"
+          }
+        },
+        {
+          "client_id": "838393979671-ml70aqjts7u43vuspdt6foqiikqr8rl4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBMiVOiqrW3DBhI06MITwlDxhPE3ytSJS8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "838393979671-ml70aqjts7u43vuspdt6foqiikqr8rl4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
