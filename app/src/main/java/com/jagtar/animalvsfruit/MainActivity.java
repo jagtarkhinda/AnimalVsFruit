@@ -32,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     int selectIndex;
     TextView question;
     TextView warning;
+    TextView showScore;
     String dataFromParticle = "";
     String particleId = "";
     String currentWord;
@@ -57,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
 
         question = (TextView) findViewById(R.id.questionLabel);
         warning = (TextView) findViewById(R.id.warning);
+        showScore = (TextView) findViewById(R.id.showScore);
         // 1. Initialize your connection to the Particle API
         ParticleCloudSDK.init(this.getApplicationContext());
 
@@ -83,7 +85,6 @@ public class MainActivity extends AppCompatActivity {
             displayWord = fruit[selectIndex];
             currentWord = "2";
         }
-        Log.d("Gali", displayWord);
     }
 
     //button to show next question
@@ -96,14 +97,36 @@ public class MainActivity extends AppCompatActivity {
             warning.setText("didn't get answer from all devices");
         }
         else if(allDevicesAnswered() == true){
+
             warning.setText("");
             //checking the answers and storing the scores
             for (int i = 0; i < devices.size(); i++)
             {
 
-            }
+                if(devices.get(i).getVote().equals(currentWord)){
+                    //sending command, function name and current device in parameters
+                        sendData("green","colors",i);
 
+                        //modifying scores
+                        devices.get(i).setScore(devices.get(i).getScore() + 1);
+                        showScore.setText("Score " + devices.get(i).getScore());
+                        Log.d("socre", "device " + i + devices.get(i).getScore());
+
+                }
+                else{
+                    //sending command, function name and current device in parameters
+                    sendData("red","colors",i);
+
+                    //modifying scores
+                    devices.get(i).setScore(devices.get(i).getScore() + 1);
+                    showScore.setText("Score " + devices.get(i).getScore());
+                    Log.d("score", "device" + i + devices.get(i).getScore());
+
+                }
+            }
+            setWord();
         }
+
     }
 
     //checking if all devices has voted
@@ -122,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     //calling this function to send data to devices
-    public void sendData(String commandToSend,String funName) {
+    public void sendData(String commandToSend,String funName,Integer currentdevice) {
         Async.executeAsync(ParticleCloudSDK.getCloud(), new Async.ApiWork<ParticleCloud, Object>() {
             @Override
             public Object callApi(@NonNull ParticleCloud particleCloud) throws ParticleCloudException, IOException {
@@ -131,14 +154,14 @@ public class MainActivity extends AppCompatActivity {
                 List<String> functionParameters = new ArrayList<String>();
                 functionParameters.add(commandToSend);
 
-                for (int i = 0; i < devices.size(); i++) {
+              //  for (int i = 0; i < devices.size(); i++) {
                     try {
-                        devices.get(i).getDevice().callFunction(funName, functionParameters);
+                        devices.get(currentdevice).getDevice().callFunction(funName, functionParameters);
                         //mDevice.callFunction("colors", functionParameters);
                     } catch (ParticleDevice.FunctionDoesNotExistException e) {
                         e.printStackTrace();
                     }
-                }
+               // }
                 return -1;
             }
 
@@ -168,12 +191,17 @@ public class MainActivity extends AppCompatActivity {
                                 dataFromParticle = "" + event.dataPayload;
                                 particleId = "" + event.deviceId;
                                 //for each device, checking if the device has pressed the button
+                                if(!dataFromParticle.equals("3")){
                                 for (int i = 0; i<devices.size();i++){
                                     if(devices.get(i).getDevice().getID().equals(particleId)){
                                         devices.get(i).setHasVoted(true);
                                         devices.get(i).setVote(dataFromParticle);
                                     }
+                                }}
+                                else if(dataFromParticle.equals("3")){
+
                                 }
+
                             }
 
                             public void onEventError(Exception e) {
@@ -218,8 +246,10 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onSuccess(Object o) {
+            public void onSuccess(Object o)
+            {
                 Log.d(TAG, "Successfully got device from Cloud");
+                getData();
             }
 
             @Override
