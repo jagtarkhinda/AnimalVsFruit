@@ -1,5 +1,6 @@
 package com.jagtar.animalvsfruit;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -28,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     String[] animal = {"ਬਾਂਦਰ", "ਘੋੜਾ", "ਹਿਰਨ" ,"ਭਾਲੂ", "ਗਾਂ", "ਬਿੱਲੀ"};
     String[] fruit = {"ਅਮਰੂਦ", "ਅਨਾਨਾਸ" ,"ਸੇਬ", "ਤਰਬੂਜ", "ਅੰਬ", "ਅੰਗੂਰ"};
     String displayWord = "";
+    int quesCount = 1;
     int selectArray;
     int selectIndex;
     TextView question;
@@ -65,6 +67,12 @@ public class MainActivity extends AppCompatActivity {
         // 2. Setup your device variable
         getDeviceFromCloud();
         setWord();
+
+        //resetting data
+        quesCount = 1;
+        for (int i = 0; i < devices.size(); i++) {
+            devices.get(i).setScore(0);
+        }
     }
 
 
@@ -94,39 +102,50 @@ public class MainActivity extends AppCompatActivity {
         //if all particles answers only then show the next question otherwise show warning
         if(allDevicesAnswered() == false)
         {
-            warning.setText("didn't get answer from all devices");
+            warning.setText("NOT ALL DEVICES ANSWERED");
         }
-        else if(allDevicesAnswered() == true){
+        else if(allDevicesAnswered() == true) {
 
             warning.setText("");
             //checking the answers and storing the scores
-            for (int i = 0; i < devices.size(); i++)
-            {
+            for (int i = 0; i < devices.size(); i++) {
 
-                if(devices.get(i).getVote().equals(currentWord)){
+                if (devices.get(i).getVote().equals(currentWord)) {
                     //sending command, function name and current device in parameters
-                        sendData("green","colors",i);
-
-                        //modifying scores
-                        devices.get(i).setScore(devices.get(i).getScore() + 1);
-                        showScore.setText("Score " + devices.get(i).getScore());
-                        Log.d("socre", "device " + i + devices.get(i).getScore());
-
-                }
-                else{
-                    //sending command, function name and current device in parameters
-                    sendData("red","colors",i);
-
+                    sendData("green", "colors", i);
                     //modifying scores
                     devices.get(i).setScore(devices.get(i).getScore() + 1);
-                    showScore.setText("Score " + devices.get(i).getScore());
-                    Log.d("score", "device" + i + devices.get(i).getScore());
-
+                    //making vote to false for next question
+                    devices.get(i).setHasVoted(false);
+                } else {
+                    //sending command, function name and current device in parameters
+                    sendData("red", "colors", i);
+                    //making vote to false for next question
+                    devices.get(i).setHasVoted(false);
                 }
             }
-            setWord();
-        }
+            //checking if 5 questions done
+            if (quesCount < 2) {
+                setWord();
+                quesCount++;
+            } else {
+                //go to next screen
+                int Score = 0;
+                String Winner = "";
+                for (int i = 0; i < devices.size(); i++) {
+                    if (devices.get(i).getScore() > Score) {
+                        Score = devices.get(i).getScore();
+                        Winner = devices.get(i).getDevice().getName();
+                    }
+                }
+                Intent finalScreen = new Intent(this, FinalScore.class);
+                finalScreen.putExtra("device" , Winner);
+                finalScreen.putExtra("score","" + Score);
+                //Optional parameters
+                startActivity(finalScreen);
+            }
 
+        }
     }
 
     //checking if all devices has voted
@@ -135,6 +154,7 @@ public class MainActivity extends AppCompatActivity {
         {
             if(devices.get(i).getHasVoted() == false) {
                 isVotingDone = false;
+                i = devices.size() + 1;
             }
             else {
                 isVotingDone = true;
@@ -191,19 +211,22 @@ public class MainActivity extends AppCompatActivity {
                                 dataFromParticle = "" + event.dataPayload;
                                 particleId = "" + event.deviceId;
                                 //for each device, checking if the device has pressed the button
-                                if(!dataFromParticle.equals("3")){
-                                for (int i = 0; i<devices.size();i++){
-                                    if(devices.get(i).getDevice().getID().equals(particleId)){
-                                        devices.get(i).setHasVoted(true);
-                                        devices.get(i).setVote(dataFromParticle);
+
+                                for (int i = 0; i < devices.size(); i++) {
+                                    if (!dataFromParticle.equals("3")) {
+                                        if (devices.get(i).getDevice().getID().equals(particleId)) {
+                                            devices.get(i).setHasVoted(true);
+                                            devices.get(i).setVote(dataFromParticle);
+                                        }
+                                    } else if (dataFromParticle.equals("3")) {
+                                        if (devices.get(i).getDevice().getID().equals(particleId)) {
+                                            showScore.setText("Device " + (i + 1)+ " Score " + devices.get(i).getScore());
+
+                                        }
                                     }
-                                }}
-                                else if(dataFromParticle.equals("3")){
 
                                 }
-
                             }
-
                             public void onEventError(Exception e) {
                                 Log.e(TAG, "Event error: ", e);
                             }
